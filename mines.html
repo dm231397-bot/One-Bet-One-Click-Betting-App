@@ -44,10 +44,7 @@ body{
   font-weight:bold;
 }
 
-/* SPACING FOR FIXED HEADER */
-.spacer{
-  height:70px;
-}
+.spacer{ height:70px; }
 
 /* PANEL */
 .panel{
@@ -81,9 +78,7 @@ button{
   background:linear-gradient(135deg,#22c55e,#16a34a);
 }
 
-button:active{
-  transform:scale(0.96);
-}
+button:active{ transform:scale(0.96); }
 
 /* GRID */
 #grid{
@@ -126,25 +121,11 @@ button:active{
   background:#ef4444;
   box-shadow:0 0 20px red;
 }
-
-/* FLOAT */
-.float{
-  position:absolute;
-  color:#22c55e;
-  font-weight:bold;
-  animation:up 1s forwards;
-}
-
-@keyframes up{
-  0%{opacity:1;transform:translateY(0);}
-  100%{opacity:0;transform:translateY(-50px);}
-}
 </style>
 </head>
 
 <body>
 
-<!-- NAVIGATION (ONLY TOP) -->
 <div class="topbar">
   <button onclick="location.href='index.html'">⬅ Lobby</button>
   <div>💣 Mines</div>
@@ -153,7 +134,6 @@ button:active{
 
 <div class="spacer"></div>
 
-<!-- GAME PANEL -->
 <div class="panel">
 
 <input id="bet" placeholder="Bet ₦">
@@ -181,17 +161,32 @@ button:active{
 <div id="grid"></div>
 
 <script>
-let wallet = parseInt(localStorage.getItem("wallet") || 1000);
+/* ===== SHARED WALLET SYSTEM ===== */
+function getWallet(){
+  return parseInt(localStorage.getItem("wallet") || 1000);
+}
 
+function setWallet(value){
+  localStorage.setItem("wallet", value);
+  updateWallet();
+}
+
+function updateWallet(){
+  document.getElementById("wallet").innerText = getWallet();
+}
+
+window.addEventListener("load", updateWallet);
+
+/* ===== GAME ===== */
 let gameActive = false;
 let mines = [];
 let bet = 0;
 let multiplier = 1;
 
-updateWallet();
-
 /* START */
 function startGame(){
+
+  let wallet = getWallet();
   bet = parseInt(document.getElementById("bet").value);
   let mineCount = parseInt(document.getElementById("minesCount").value);
 
@@ -201,7 +196,7 @@ function startGame(){
   }
 
   wallet -= bet;
-  saveWallet();
+  setWallet(wallet);
 
   gameActive = true;
   multiplier = 1;
@@ -257,24 +252,15 @@ function reveal(t, inner, i){
 function cashout(){
   if(!gameActive) return;
 
+  let wallet = getWallet();
   let win = Math.floor(bet * multiplier);
-  wallet += win;
 
-  saveWallet();
+  wallet += win;
+  setWallet(wallet);
 
   alert("Won ₦" + win);
 
   gameActive = false;
-}
-
-/* WALLET */
-function saveWallet(){
-  localStorage.setItem("wallet", wallet);
-  updateWallet();
-}
-
-function updateWallet(){
-  document.getElementById("wallet").innerText = wallet;
 }
 </script>
 
