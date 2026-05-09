@@ -77,13 +77,8 @@ body {
   border-radius:6px;
 }
 
-#prev {
-  left:10px;
-}
-
-#next {
-  right:10px;
-}
+#prev { left:10px; }
+#next { right:10px; }
 
 /* GAMES */
 .games {
@@ -137,10 +132,7 @@ body {
 <!-- BANNER -->
 <div class="banner">
 
-  <!-- MINES BANNER -->
   <img class="active" src="https://i.ibb.co/35yZXH4s/openart-gpt-image-2-1-1778328412885-040d3dc2.png">
-
-  <!-- AVIATOR BANNER -->
   <img src="https://i.ibb.co/KxJMWB6R/gpt-image-2-1.png">
 
   <button id="prev" class="navBtn">⬅</button>
@@ -169,14 +161,26 @@ body {
 </div>
 
 <script>
-/* WALLET */
-let wallet = localStorage.getItem("wallet") 
-  ? Number(localStorage.getItem("wallet")) 
-  : 1000;
+/* ===== SHARED WALLET SYSTEM (ADDED) ===== */
 
-document.getElementById("wallet").innerText = wallet;
+function getWallet(){
+  return parseInt(localStorage.getItem("wallet") || 1000);
+}
 
-/* BANNER SLIDER (MANUAL) */
+function setWallet(value){
+  localStorage.setItem("wallet", value);
+  updateWallet();
+}
+
+function updateWallet(){
+  document.getElementById("wallet").innerText = getWallet();
+}
+
+/* auto sync wallet */
+window.addEventListener("load", updateWallet);
+setInterval(updateWallet, 500);
+
+/* ===== BANNER SLIDER ===== */
 let banners = document.querySelectorAll(".banner img");
 let index = 0;
 
