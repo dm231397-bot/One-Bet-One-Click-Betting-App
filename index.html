@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>One Bet One Click</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, sans-serif;
+}
+
+body {
+  background:#0b0f1a;
+  color:white;
+}
+
+/* TOP BAR */
+.topbar {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 15px;
+  background:#0f172a;
+  position:sticky;
+  top:0;
+}
+
+.logo img {
+  height:35px;
+}
+
+.wallet {
+  color:#22c55e;
+  font-weight:bold;
+}
+
+.menu {
+  font-size:22px;
+  cursor:pointer;
+}
+
+/* ===== BANNER ===== */
+.banner {
+  position:relative;
+  width:100%;
+  height:180px;
+  overflow:hidden;
+  border-bottom:2px solid #1e293b;
+}
+
+.banner img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:none;
+}
+
+.banner img.active {
+  display:block;
+}
+
+/* NAV BUTTONS */
+.navBtn {
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  background:rgba(0,0,0,0.5);
+  border:none;
+  color:white;
+  font-size:20px;
+  padding:8px 12px;
+  cursor:pointer;
+  border-radius:6px;
+}
+
+#prev {
+  left:10px;
+}
+
+#next {
+  right:10px;
+}
+
+/* GAMES */
+.games {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:15px;
+  padding:15px;
+}
+
+.game {
+  background:#111827;
+  border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.game:hover {
+  transform:scale(1.05);
+}
+
+.game img {
+  width:100%;
+  height:120px;
+  object-fit:cover;
+}
+
+.game-title {
+  text-align:center;
+  padding:8px;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+
+  <div class="logo">
+    <img src="https://i.ibb.co/ZR5CxCXG/Chat-GPT-Image-May-8-2026-11-30-32-AM.png">
+  </div>
+
+  <div class="wallet">₦<span id="wallet">1000</span></div>
+
+  <div class="menu">☰</div>
+
+</div>
+
+<!-- BANNER -->
+<div class="banner">
+
+  <!-- MINES BANNER -->
+  <img class="active" src="https://i.ibb.co/35yZXH4s/openart-gpt-image-2-1-1778328412885-040d3dc2.png">
+
+  <!-- AVIATOR BANNER -->
+  <img src="https://i.ibb.co/KxJMWB6R/gpt-image-2-1.png">
+
+  <button id="prev" class="navBtn">⬅</button>
+  <button id="next" class="navBtn">➡</button>
+
+</div>
+
+<!-- GAMES -->
+<div class="games">
+
+  <div class="game" onclick="location.href='mines.html'">
+    <img src="https://i.ibb.co/YBNLKRd3/download-1.jpg">
+    <div class="game-title">💣 Mines</div>
+  </div>
+
+  <div class="game" onclick="location.href='aviator.html'">
+    <img src="https://i.ibb.co/NHvkGgb/download-5.jpg">
+    <div class="game-title">✈️ Aviator</div>
+  </div>
+
+  <div class="game" onclick="location.href='dice.html'">
+    <img src="https://i.ibb.co/vvBPvwvv/images-4.jpg">
+    <div class="game-title">🎲 Dice</div>
+  </div>
+
+</div>
+
+<script>
+/* WALLET */
+let wallet = localStorage.getItem("wallet") 
+  ? Number(localStorage.getItem("wallet")) 
+  : 1000;
+
+document.getElementById("wallet").innerText = wallet;
+
+/* BANNER SLIDER (MANUAL) */
+let banners = document.querySelectorAll(".banner img");
+let index = 0;
+
+function showBanner(i){
+  banners.forEach(b => b.classList.remove("active"));
+  banners[i].classList.add("active");
+}
+
+document.getElementById("next").onclick = () => {
+  index++;
+  if(index >= banners.length) index = 0;
+  showBanner(index);
+};
+
+document.getElementById("prev").onclick = () => {
+  index--;
+  if(index < 0) index = banners.length - 1;
+  showBanner(index);
+};
+</script>
+
+</body>
+</html>
