@@ -2,7 +2,8 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>💣 Mines</title>
+<title>💣 Mines Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
@@ -11,32 +12,19 @@ body{
   background: radial-gradient(circle at top,#0b1220,#020617);
   color:white;
   text-align:center;
-  overflow-x:hidden;
 }
 
-/* TOP NAV ONLY */
+/* TOP BAR */
 .topbar{
   position:fixed;
   top:0;
   left:0;
   width:100%;
-  z-index:999;
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  padding:12px 15px;
-  background:rgba(17,24,39,0.9);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(255,255,255,0.05);
-}
-
-.topbar button{
-  padding:8px 12px;
-  border:none;
-  border-radius:8px;
-  background:#1f2937;
-  color:white;
-  cursor:pointer;
+  padding:12px;
+  background:rgba(17,24,39,0.95);
+  z-index:1000;
 }
 
 .wallet{
@@ -44,46 +32,47 @@ body{
   font-weight:bold;
 }
 
-.spacer{ height:70px; }
+/* SPACE */
+.spacer{height:70px;}
 
 /* PANEL */
 .panel{
-  margin:15px auto;
+  margin:10px auto;
   width:92%;
   max-width:420px;
   background:rgba(255,255,255,0.05);
-  padding:18px;
-  border-radius:16px;
+  padding:15px;
+  border-radius:14px;
+  backdrop-filter:blur(10px);
 }
 
-/* INPUTS */
 input,select{
-  width:92%;
+  width:90%;
   padding:10px;
   margin:6px;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
   background:#111827;
   color:white;
 }
 
-/* BUTTONS */
 button{
-  padding:12px;
+  padding:10px 14px;
   margin:6px;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:white;
   font-weight:bold;
   cursor:pointer;
-  background:linear-gradient(135deg,#22c55e,#16a34a);
 }
 
-button:active{ transform:scale(0.96); }
+button:active{transform:scale(0.96);}
 
 /* GRID */
 #grid{
   display:grid;
-  grid-template-columns:repeat(5,70px);
+  grid-template-columns:repeat(5,65px);
   gap:10px;
   justify-content:center;
   margin-top:20px;
@@ -91,182 +80,212 @@ button:active{ transform:scale(0.96); }
 
 /* TILE */
 .tile{
-  width:70px;
-  height:70px;
+  width:65px;
+  height:65px;
   perspective:600px;
+  cursor:pointer;
 }
 
 .inner{
   width:100%;
   height:100%;
-  border-radius:12px;
   background:#1f2937;
+  border-radius:10px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
-  transition:0.4s;
+  font-size:20px;
+  transition:0.35s;
+  transform-style:preserve-3d;
 }
 
+/* FLIP */
 .tile.flipped .inner{
   transform:rotateY(180deg);
 }
 
 .safe{
   background:#22c55e;
-  box-shadow:0 0 15px #22c55e;
+  box-shadow:0 0 12px #22c55e;
 }
 
 .bomb{
   background:#ef4444;
-  box-shadow:0 0 20px red;
+  box-shadow:0 0 15px red;
+}
+
+#status{
+  margin-top:10px;
+  color:#facc15;
 }
 </style>
 </head>
 
 <body>
 
+<!-- TOP -->
 <div class="topbar">
-  <button onclick="location.href='index.html'">⬅</button>
-  <div>💣 Mines</div>
-  <div class="wallet">₦<span id="wallet">0</span></div>
+  <button onclick="location.href='index.html'">⬅ Home</button>
+  <div>💣 Mines Pro</div>
+  <div class="wallet">₦<span id="wallet">1000</span></div>
 </div>
 
 <div class="spacer"></div>
 
+<!-- PANEL -->
 <div class="panel">
 
-<input id="bet" placeholder="Bet ₦">
+<input id="bet" placeholder="Bet amount">
 
 <select id="minesCount">
   <option value="1">1 Mine</option>
-  <option value="2">2 Mines</option>
   <option value="3">3 Mines</option>
-  <option value="4">4 Mines</option>
   <option value="5">5 Mines</option>
-  <option value="6">6 Mines</option>
-  <option value="7">7 Mines</option>
-  <option value="8">8 Mines</option>
-  <option value="9">9 Mines</option>
   <option value="10">10 Mines</option>
 </select>
 
 <select id="risk">
-  <option value="low">Low</option>
+  <option value="low">Low Risk</option>
   <option value="medium">Medium</option>
   <option value="high">High</option>
 </select>
 
-<button onclick="startGame()">Start</button>
+<button onclick="startGame()">Start Game</button>
 <button onclick="cashout()">Cashout</button>
 
 <h3>Multiplier: <span id="multi">x1.00</span></h3>
+<div id="status">Place a bet to start</div>
 
 </div>
 
 <div id="grid"></div>
 
 <script>
-/* ===== SHARED WALLET SYSTEM ===== */
-function getWallet(){
-  return parseInt(localStorage.getItem("wallet") || 1000);
-}
+let wallet = parseInt(localStorage.getItem("wallet") || 1000);
 
-function setWallet(value){
-  localStorage.setItem("wallet", value);
-  updateWallet();
-}
-
-function updateWallet(){
-  document.getElementById("wallet").innerText = getWallet();
-}
-
-window.addEventListener("load", updateWallet);
-
-/* ===== GAME ===== */
-let gameActive = false;
 let mines = [];
 let bet = 0;
+let gameActive = false;
+let revealed = 0;
 let multiplier = 1;
+let cashed = false;
+
+updateWallet();
+
+/* WALLET */
+function updateWallet(){
+  document.getElementById("wallet").innerText = wallet;
+  localStorage.setItem("wallet", wallet);
+}
 
 /* START */
 function startGame(){
 
-  let wallet = getWallet();
   bet = parseInt(document.getElementById("bet").value);
-  let mineCount = parseInt(document.getElementById("minesCount").value);
 
   if(!bet || bet > wallet){
-    alert("Insufficient balance");
+    document.getElementById("status").innerText = "❌ Insufficient balance";
     return;
   }
 
   wallet -= bet;
-  setWallet(wallet);
+  updateWallet();
 
   gameActive = true;
+  cashed = false;
+  revealed = 0;
   multiplier = 1;
 
+  document.getElementById("multi").innerText = "x1.00";
+  document.getElementById("status").innerText = "Game started!";
+
+  createGrid();
+  generateMines();
+}
+
+/* MINES */
+function generateMines(){
   mines = [];
-  while(mines.length < mineCount){
+  let count = parseInt(document.getElementById("minesCount").value);
+
+  while(mines.length < count){
     let r = Math.floor(Math.random()*25);
     if(!mines.includes(r)) mines.push(r);
   }
-
-  createGrid();
 }
 
 /* GRID */
 function createGrid(){
+  let grid = document.getElementById("grid");
   grid.innerHTML = "";
 
   for(let i=0;i<25;i++){
-    let t = document.createElement("div");
-    t.className = "tile";
+    let tile = document.createElement("div");
+    tile.className = "tile";
 
     let inner = document.createElement("div");
     inner.className = "inner";
-    inner.innerHTML = "?";
+    inner.innerHTML = "⬜";
 
-    t.appendChild(inner);
-    t.onclick = ()=>reveal(t, inner, i);
+    tile.appendChild(inner);
 
-    grid.appendChild(t);
+    tile.onclick = ()=>reveal(tile, inner, i);
+
+    grid.appendChild(tile);
   }
 }
 
 /* REVEAL */
-function reveal(t, inner, i){
-  if(!gameActive || t.classList.contains("flipped")) return;
+function reveal(tile, inner, i){
 
-  t.classList.add("flipped");
+  if(!gameActive || tile.classList.contains("flipped")) return;
+
+  tile.classList.add("flipped");
 
   if(mines.includes(i)){
     inner.classList.add("bomb");
     inner.innerHTML = "💣";
-    gameActive = false;
-  }else{
-    inner.classList.add("safe");
-    inner.innerHTML = "💎";
 
-    multiplier += 0.3;
-    multi.innerText = "x" + multiplier.toFixed(2);
+    gameActive = false;
+    bet = 0;
+
+    document.getElementById("status").innerText = "💥 You lost!";
+    return;
   }
+
+  inner.classList.add("safe");
+  inner.innerHTML = "💎";
+
+  revealed++;
+
+  multiplier += 0.25;
+  document.getElementById("multi").innerText = "x" + multiplier.toFixed(2);
 }
 
 /* CASHOUT */
 function cashout(){
-  if(!gameActive) return;
 
-  let wallet = getWallet();
+  if(!gameActive){
+    document.getElementById("status").innerText = "⚠️ Place a bet first";
+    return;
+  }
+
+  if(cashed || bet <= 0){
+    document.getElementById("status").innerText = "⚠️ Already cashed or no bet";
+    return;
+  }
+
+  cashed = true;
+
   let win = Math.floor(bet * multiplier);
 
   wallet += win;
-  setWallet(wallet);
-
-  alert("Won ₦" + win);
+  updateWallet();
 
   gameActive = false;
+
+  document.getElementById("status").innerText =
+    "💰 Won ₦" + win;
 }
 </script>
 
